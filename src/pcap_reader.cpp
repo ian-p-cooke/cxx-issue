@@ -18,7 +18,10 @@ void read_pcap(
     /*
         typedef void(*       OnTcpMessageReady) (int8_t side, const TcpStreamData &tcpData, void *userCookie)
      */
-    pcpp::TcpReassembly tcpReassembly(onMessageReadyCallback, &userCookie);
+    auto onMessageReady = [] (int8_t side, const pcpp::TcpStreamData &tcpData, void *userCookie) { 
+      onMessageReadyCallback(side, tcpData, (UserCookie *)userCookie);
+    };
+    pcpp::TcpReassembly tcpReassembly(onMessageReady, &userCookie);
 
     // open input file (pcap or pcapng file)
     std::string fileName_s(fileName.data(), fileName.length());
@@ -57,6 +60,4 @@ void read_pcap(
     delete reader;
 
     printf("Done! processed %d connections\n", (int)numOfConnectionsProcessed);
-}
-
 }

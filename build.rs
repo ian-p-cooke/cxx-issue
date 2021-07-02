@@ -2,6 +2,11 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    println!("cargo:rustc-link-search=lib");
+    println!("cargo:rustc-link-lib=static=pcap");
+    println!("cargo:rustc-link-lib=static=Common++");
+    println!("cargo:rustc-link-lib=static=Packet++");
+    println!("cargo:rustc-link-lib=static=Pcap++");
     println!("cargo:rerun-if-changed=wrapper.hpp");
 
     let bindings = bindgen::Builder::default()
@@ -25,7 +30,7 @@ fn main() {
 
     cxx_build::bridge("src/main.rs")
         .file("src/pcap_reader.cpp")
-        .flag_if_supported("-std=c++17")
+        .flag("-std=c++17")
         //.include("/home/icooke/opt/PcapPlusPlus/include")
         .compile("demo");
 }

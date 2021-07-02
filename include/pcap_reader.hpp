@@ -1,3 +1,5 @@
+#include "demo/include/pcapplusplus/TcpReassembly.h"
+#include "demo/include/pcapplusplus/PcapFileDevice.h"
 
 #include "rust/cxx.h"
 

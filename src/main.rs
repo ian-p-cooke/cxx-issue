@@ -14,34 +14,38 @@ unsafe impl ExternType for root::pcpp::ConnectionData {
     type Kind = cxx::kind::Opaque;
 }
 
-#[cxx::bridge(namespace = "pcpp")]
-mod ffi_ppcp {
-    extern "C++" {
-        type TcpStreamData = crate::root::pcpp::TcpStreamData;
-        type ConnectionData = crate::root::pcpp::ConnectionData;
-    }
+pub struct UserCookie {
+    num_callbacks: u64,
 }
 
-struct UserCookie;
-
-fn onMessageReadyCallback(side: i8, tcpData: &crate::root::pcpp::TcpStreamData, userCookie: *mut ::std::os::raw::c_void) {
-    println!("onMessageReadyCallback!");
+unsafe fn onMessageReadyCallback(side: i8, tcpData: &crate::root::pcpp::TcpStreamData, userCookie: *mut UserCookie) {
+    let cookie = &mut *userCookie;
+    cookie.num_callbacks += 1;
 }
 
 #[cxx::bridge]
 mod ffi {
-    extern "Rust" {
-        type UserCookie;
-        fn onMessageReadyCallback(side: i8, tcpData: &crate::ffi_pcpp::TcpStreamData, userCookie: *mut ::std::os::raw::c_void);
+    #[namespace = "pcpp"]
+    extern "C++" {
+        type TcpStreamData = crate::root::pcpp::TcpStreamData;
+        type ConnectionData = crate::root::pcpp::ConnectionData;
     }
 
-    extern "C++" {
+    extern "Rust" {
+        type UserCookie;
+        unsafe fn onMessageReadyCallback(side: i8, tcpData: &TcpStreamData, userCookie: *mut UserCookie);
+    }
+
+    unsafe extern "C++" {
         include!("demo/include/pcap_reader.hpp");
-        unsafe fn read_pcap(fileName: &str,
+        fn read_pcap(fileName: &str,
                             userCookie: &mut UserCookie,
                             bpfFilter: &str);
     }
 }
 
 fn main() {
+    let mut cookie = UserCookie { num_callbacks: 0 };
+    ffi::read_pcap("my.pcap", &mut cookie, "");
+    println!("num_callbacks: {}", cookie.num_callbacks);
 }
