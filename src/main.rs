@@ -24,7 +24,7 @@ mod ffi_ppcp {
 
 struct UserCookie;
 
-fn onMessageReadyCallback(side: i8, tcpData: crate::root::pcpp::TcpStreamData, userCookie: *mut ::std::os::raw::c_void) {
+fn onMessageReadyCallback(side: i8, tcpData: &crate::root::pcpp::TcpStreamData, userCookie: *mut ::std::os::raw::c_void) {
     println!("onMessageReadyCallback!");
 }
 
@@ -32,7 +32,7 @@ fn onMessageReadyCallback(side: i8, tcpData: crate::root::pcpp::TcpStreamData, u
 mod ffi {
     extern "Rust" {
         type UserCookie;
-        fn onMessageReadyCallback(side: i8, tcpData: crate::ffi_pcpp::TcpStreamData, userCookie: *mut ::std::os::raw::c_void);
+        fn onMessageReadyCallback(side: i8, tcpData: &crate::ffi_pcpp::TcpStreamData, userCookie: *mut ::std::os::raw::c_void);
     }
 
     extern "C++" {
